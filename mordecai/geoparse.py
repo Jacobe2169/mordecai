@@ -18,21 +18,15 @@ except ImportError:
     from backports.functools_lru_cache import lru_cache
     print("Mordecai requires Python 3 and seems to be running in Python 2.")
 
-try:
-    nlp
-except NameError:
-    try:
-        nlp = spacy.load('en_core_web_lg', disable=['parser', 'tagger'])
-        #nlp = spacy.load('en_core_web_lg', disable=['tagger'])
-    except OSError:
-        print("""ERROR: No spaCy NLP model installed.
-Install with this command: `python -m spacy download en_core_web_lg`.""")
 
 
 class Geoparser:
     def __init__(self, es_ip="localhost", es_port="9200", verbose=False,
                  country_threshold=0.6, threads=True, progress=True,
                  mod_date="2018-06-05", **kwargs):
+        # Change so any language model can be load
+        lang_nlp=kwargs.get("spacy_model","en_core_web_lg")
+        self.nlp = spacy.load(lang_nlp, disable=['parser', 'tagger'])
         DATA_PATH = pkg_resources.resource_filename('mordecai', 'data/')
         MODELS_PATH = pkg_resources.resource_filename('mordecai', 'models/')
         self._cts = utilities.country_list_maker()
@@ -466,7 +460,7 @@ https://github.com/openeventdata/mordecai/ for instructions on updating.""".form
             to be renamed "meta" or be deleted.)
         """
         if not hasattr(doc, "ents"):
-            doc = nlp(doc)
+            doc = self.nlp(doc)
         # initialize the place to store finalized tasks
         task_list = []
 
@@ -680,7 +674,7 @@ https://github.com/openeventdata/mordecai/ for instructions on updating.""".form
 
         """
         if not hasattr(doc, "ents"):
-            doc = nlp(doc)
+            doc = sefl.nlp(doc)
         proced = self.make_country_features(doc, require_maj=False)
         if not proced:
             pass
@@ -977,7 +971,7 @@ https://github.com/openeventdata/mordecai/ for instructions on updating.""".form
             and optionally, the input features.
         """
         if not hasattr(doc, "ents"):
-            doc = nlp(doc)
+            doc = self.nlp(doc)
         proced = self.infer_country(doc)
         if not proced:
             return []
@@ -1042,7 +1036,7 @@ https://github.com/openeventdata/mordecai/ for instructions on updating.""".form
         """
         if not self.threads:
             print("batch_geoparsed should be used with threaded searches. Please set `threads=True` when initializing the geoparser.")
-        nlped_docs = list(nlp.pipe(text_list, as_tuples=False, n_threads=multiprocessing.cpu_count()))
+        nlped_docs = list(self.nlp.pipe(text_list, as_tuples=False, n_threads=multiprocessing.cpu_count()))
         processed = []
         for i in tqdm(nlped_docs, disable=not self.progress):
             p = self.geoparse(i)
