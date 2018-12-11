@@ -1,3 +1,3 @@
 from .geoparse import Geoparser
-from .geoparse2 import Geoparser as GeoparserList
+from .geocoding import Geoparser as GeocodeList
 __version__ = "2.0.1"

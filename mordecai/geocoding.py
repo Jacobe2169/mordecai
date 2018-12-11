@@ -20,7 +20,7 @@ except ImportError:
 
 
 
-class Geoparser:
+class GeocodeList:
     def __init__(self, es_ip="localhost", es_port="9200", verbose=False,
                  country_threshold=0.6, threads=True, progress=True,
                  mod_date="2018-06-05", **kwargs):
